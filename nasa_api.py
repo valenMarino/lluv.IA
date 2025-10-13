@@ -34,13 +34,54 @@ def obtener_datos_precipitacion(provincia: str) -> pd.DataFrame:
         "header": "true"
     }
 
-    r = requests.get(url, params=params)
-    data = r.json()
-    series = data["properties"]["parameter"]["PRECTOTCORR"]
+    r = requests.get(url, params=params, timeout=30)
+    try:
+        r.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Error en la solicitud a NASA POWER: {e}") from e
+
+    try:
+        data = r.json()
+    except ValueError as e:
+        raise RuntimeError(f"Respuesta no JSON de NASA POWER: {r.text[:200]}") from e
+
+    if not isinstance(data, dict):
+        raise RuntimeError(f"Respuesta inesperada de NASA POWER (no es un objeto JSON): {type(data)}")
+
+    props = data.get("properties")
+    series = None
+
+    if props is not None:
+        parameter = props.get("parameter")
+        if parameter is None:
+            raise RuntimeError(f"La respuesta de NASA POWER no contiene 'parameter' dentro de 'properties'. Respuesta: {str(props)[:500]}")
+
+        series = parameter.get("PRECTOTCORR")
+    else:
+        features = data.get("features")
+        if isinstance(features, list) and len(features) > 0:
+            agg = {}
+            counts = {}
+            for feat in features:
+                p = feat.get("properties", {})
+                param = p.get("parameter", {})
+                s = param.get("PRECTOTCORR") if isinstance(param, dict) else None
+                if isinstance(s, dict):
+                    for date, val in s.items():
+                        if val is None:
+                            continue
+                        agg[date] = agg.get(date, 0.0) + float(val)
+                        counts[date] = counts.get(date, 0) + 1
+            if agg:
+                series = {d: (agg[d] / counts[d]) for d in agg}
+
+    if series is None:
+        raise RuntimeError(f"La serie 'PRECTOTCORR' no está presente en la respuesta de NASA POWER. Respuesta: {str(data)[:500]}")
 
     df = pd.DataFrame(list(series.items()), columns=["date", "precip_mm_day"])
     df["year"] = df["date"].str[:4].astype(int)
     df["month"] = df["date"].str[4:].astype(int)
+    df = df[(df["month"] >= 1) & (df["month"] <= 12)].copy()
     df["days"] = df.apply(lambda r: calendar.monthrange(r["year"], r["month"])[1], axis=1)
     df["precip_mm_month"] = df["precip_mm_day"] * df["days"]
     df["ds"] = pd.to_datetime(df["year"].astype(str) + "-" + df["month"].astype(str) + "-15")
