@@ -1,4 +1,4 @@
-# 🌾 AgroRain – Predicción Inteligente de Precipitaciones
+# 🌾 Lluv.IA – Predicción Inteligente de Precipitaciones
 
 Proyecto de IA aplicado al sector agro, que analiza y predice la precipitación mensual histórica (1981–2025) en distintas provincias argentinas, usando datos reales de la API de NASA POWER.
 
