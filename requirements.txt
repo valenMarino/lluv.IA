@@ -1,0 +1,6 @@
+requests
+pandas
+matplotlib
+plotly
+prophet
+gradio
