@@ -82,168 +82,13 @@ def analizar_provincia_completo(provincia, incluir_temperatura=True, incluir_com
 def crear_ui():
     """Crea la interfaz de usuario mejorada y funcional."""
     
-    # CSS mejorado con tipografía profesional
-    custom_css = """
-    /* Importar fuente profesional */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    /* Tema principal */
-    .gradio-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        min-height: 100vh;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    }
-    
-    /* Contenedor principal */
-    .main-container {
-        background: rgba(255, 255, 255, 0.95) !important;
-        border-radius: 20px !important;
-        padding: 2rem !important;
-        margin: 1rem !important;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
-        backdrop-filter: blur(10px) !important;
-    }
-    
-    /* Títulos con tipografía profesional */
-    h1 {
-        color: #2d3748 !important;
-        text-align: center !important;
-        margin-bottom: 0.5rem !important;
-        font-weight: 700 !important;
-        font-family: 'Inter', sans-serif !important;
-        letter-spacing: -0.025em !important;
-    }
-    
-    h3 {
-        color: #4a5568 !important;
-        text-align: center !important;
-        margin-bottom: 2rem !important;
-        font-weight: 500 !important;
-        font-family: 'Inter', sans-serif !important;
-        letter-spacing: -0.01em !important;
-    }
-    
-    /* Texto general */
-    body, .gr-textbox, .gr-dropdown, .gr-button, label {
-        font-family: 'Inter', sans-serif !important;
-    }
-    
-    /* Controles */
-    .gr-dropdown {
-        border-radius: 12px !important;
-        border: 2px solid #e2e8f0 !important;
-        background: white !important;
-    }
-    
-    .gr-dropdown:focus {
-        border-color: #667eea !important;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
-    }
-    
-    /* Botón principal con loader */
-    .gr-button-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        border: none !important;
-        border-radius: 12px !important;
-        padding: 12px 24px !important;
-        font-weight: 600 !important;
-        font-size: 16px !important;
-        color: white !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
-        font-family: 'Inter', sans-serif !important;
-        position: relative !important;
-    }
-    
-    .gr-button-primary:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4) !important;
-    }
-    
-    .gr-button-primary:disabled {
-        opacity: 0.7 !important;
-        cursor: not-allowed !important;
-        transform: none !important;
-    }
-    
-    /* Loader spinner */
-    .loading-spinner {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin 1s ease-in-out infinite;
-        margin-right: 8px;
-    }
-    
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-    
-    /* Checkboxes */
-    .gr-checkbox {
-        margin: 0.5rem 0 !important;
-    }
-    
-    /* Área de texto */
-    .gr-textbox {
-        border-radius: 12px !important;
-        border: 2px solid #e2e8f0 !important;
-    }
-    
-    /* Pestañas */
-    .gr-tabs {
-        margin-top: 2rem !important;
-    }
-    
-    .gr-tab-nav {
-        background: #f7fafc !important;
-        border-radius: 12px 12px 0 0 !important;
-        border: none !important;
-    }
-    
-    .gr-tab-nav button {
-        border-radius: 8px !important;
-        margin: 4px !important;
-        border: none !important;
-        background: transparent !important;
-        color: #4a5568 !important;
-        font-weight: 500 !important;
-    }
-    
-    .gr-tab-nav button.selected {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-    }
-    
-    /* Gráficos */
-    .gr-plot {
-        border-radius: 12px !important;
-        border: 2px solid #e2e8f0 !important;
-        background: white !important;
-    }
-    
-    /* Información lateral */
-    .info-panel {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
-        border-radius: 16px !important;
-        padding: 1.5rem !important;
-        color: white !important;
-        margin-left: 1rem !important;
-    }
-    
-    .info-panel h3 {
-        color: white !important;
-        margin-bottom: 1rem !important;
-    }
-    
-    .info-panel p {
-        color: rgba(255,255,255,0.9) !important;
-        line-height: 1.6 !important;
-    }
-    """
+    # Cargar CSS desde archivo externo
+    try:
+        with open('styles.css', 'r', encoding='utf-8') as f:
+            custom_css = f.read()
+    except FileNotFoundError:
+        # CSS de respaldo en caso de que no se encuentre el archivo
+        custom_css = ""
     
     # Lista de provincias ordenada
     provincias_lista = sorted(list(PROVINCIAS_COORDS.keys()))
@@ -252,9 +97,10 @@ def crear_ui():
     with gr.Blocks(css=custom_css, title="Lluv.IA", theme=gr.themes.Soft()) as app:
         
         with gr.Column(elem_classes=["main-container"]):
-            # Encabezado
-            gr.Markdown("#Lluv.IA - Análisis Meteorológico Inteligente")
-            gr.Markdown("### 🇦🇷 Predicción y análisis climático para todas las provincias argentinas")
+            # Header profesional
+            with gr.Column(elem_classes=["header-container"]):
+                gr.HTML('<h1 class="main-title">Lluv.IA</h1>')
+                gr.HTML('<p class="main-subtitle">Predicción y análisis climático para todas las provincias argentinas</p>')
             
             with gr.Row():
                 with gr.Column(scale=3):
@@ -263,7 +109,7 @@ def crear_ui():
                         choices=provincias_lista,
                         value="Buenos Aires",
                         label="🗺️ Seleccionar Provincia",
-                        info="Elegí una provincia argentina para analizar"
+                        info="Elegí una provincia para analizar"
                     )
                     
                     # Selector de rango de fechas
@@ -298,22 +144,57 @@ def crear_ui():
                     )
                 
                 with gr.Column(scale=1, elem_classes=["info-panel"]):
-                    gr.Markdown(
-                        "### 📋 Información\n\n"
-                        "🌧️ **Precipitaciones**\n"
-                        "Datos históricos 1981-2025\n\n"
-                        "🌡️ **Temperatura**\n"
-                        "Promedio, máxima y mínima\n\n"
-                        "💧 **Humedad**\n"
-                        "Humedad relativa del aire\n\n"
-                        "🔮 **Predicción**\n"
-                        "Proyección a 24 meses\n\n"
-                        "📊 **Métricas**\n"
-                        "• Promedios históricos\n"
-                        "• Tendencias estacionales\n"
-                        "• Índices de variabilidad\n"
-                        "• Alertas climáticas"
-                    )
+                    gr.HTML("""
+                        <h3>📋 Información</h3>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <div style="color: #ffffff; font-weight: 600; margin-bottom: 0.25rem;">
+                                🌧️ <strong>Precipitaciones</strong>
+                            </div>
+                            <div style="color: #f1f5f9; font-size: 0.9rem;">
+                                Datos históricos 1981-2025
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <div style="color: #ffffff; font-weight: 600; margin-bottom: 0.25rem;">
+                                🌡️ <strong>Temperatura</strong>
+                            </div>
+                            <div style="color: #f1f5f9; font-size: 0.9rem;">
+                                Promedio, máxima y mínima
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <div style="color: #ffffff; font-weight: 600; margin-bottom: 0.25rem;">
+                                💧 <strong>Humedad</strong>
+                            </div>
+                            <div style="color: #f1f5f9; font-size: 0.9rem;">
+                                Humedad relativa del aire
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <div style="color: #ffffff; font-weight: 600; margin-bottom: 0.25rem;">
+                                🔮 <strong>Predicción</strong>
+                            </div>
+                            <div style="color: #f1f5f9; font-size: 0.9rem;">
+                                Proyección a 24 meses
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div style="color: #ffffff; font-weight: 600; margin-bottom: 0.25rem;">
+                                📊 <strong>Métricas</strong>
+                            </div>
+                            <div style="color: #f1f5f9; font-size: 0.9rem;">
+                                • Promedios históricos<br>
+                                • Tendencias estacionales<br>
+                                • Índices de variabilidad<br>
+                                • Alertas climáticas
+                            </div>
+                        </div>
+                    """)
             
             # Resultados
             reporte_output = gr.Textbox(
@@ -343,7 +224,7 @@ def crear_ui():
                 "🔬 **Fuente:** NASA POWER API • "
                 "🤖 **IA:** Prophet (Facebook) • "
                 "📅 **Actualización:** 2025\n\n"
-                "*Desarrollado para el sector agropecuario argentino* 🇦🇷"
+                "*Desarrollado para el sector agropecuario argentino*"
             )
         
         # Eventos con progress
