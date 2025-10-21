@@ -319,13 +319,13 @@ def calcular_estadisticas_climaticas(df: pd.DataFrame) -> Dict[str, Any]:
     
     return estadisticas
 
-def generar_reporte_climatico(provincia: str, df: pd.DataFrame, forecast: pd.DataFrame, estadisticas: Dict[str, Any]) -> str:
+def generar_reporte_climatico(provincia: str, df: pd.DataFrame, forecast: pd.DataFrame, estadisticas: Dict[str, Any], fecha_inicio: str, fecha_fin: str) -> str:
     """Genera un reporte climático detallado en español."""
     reporte = []
     
     reporte.append(f"🌾 REPORTE CLIMÁTICO DETALLADO - {provincia.upper()}")
     reporte.append("=" * 60)
-    reporte.append(f"📅 Período analizado: 1981-2025 | Generado: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}")
+    reporte.append(f"📅 Período analizado: {fecha_inicio} - {fecha_fin} | Generado: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}")
     reporte.append("")
     
     reporte.append("📊 RESUMEN EJECUTIVO")

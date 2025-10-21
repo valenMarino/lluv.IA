@@ -48,7 +48,7 @@ def analizar_provincia_completo(provincia, incluir_temperatura=True, incluir_com
         
         # Generar reporte detallado
         progress(0.7, desc="Generando reporte detallado...")
-        reporte = generar_reporte_climatico(provincia, df_completo, forecast, estadisticas)
+        reporte = generar_reporte_climatico(provincia, df_completo, forecast, estadisticas, fecha_inicio, fecha_fin)
         
         # Generar gráficos
         progress(0.8, desc="Creando visualizaciones...")
@@ -218,14 +218,7 @@ def crear_ui():
                 with gr.TabItem("📊 Comparativo Anual"):
                     plot_comparativo = gr.Plot()
             
-            # Pie de página
-            gr.Markdown(
-                "---\n"
-                "🔬 **Fuente:** NASA POWER API • "
-                "🤖 **IA:** Prophet (Facebook) • "
-                "📅 **Actualización:** 2025\n\n"
-                "*Desarrollado para el sector agropecuario argentino*"
-            )
+            
         
         # Eventos con progress
         analizar_btn.click(
