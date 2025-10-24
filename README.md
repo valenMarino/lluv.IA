@@ -96,7 +96,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Ejecutar la aplicación
-python main.py
+python app.py
 ```
 
 ### Instalación Directa (Sin entorno virtual)
@@ -109,7 +109,7 @@ cd lluv.IA
 pip install -r requirements.txt
 
 # Ejecutar la aplicación
-python main.py
+python app.py
 ```
 
 ## Interfaz de Usuario
@@ -164,4 +164,3 @@ Este proyecto está desarrollado para el sector agropecuario argentino con fines
 
 ---
 
-**Desarrollado con ❤️ para el agro argentino** 🇦🇷
