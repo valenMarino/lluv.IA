@@ -8,6 +8,8 @@ from utils import (
     graficar_temperatura, graficar_comparativo_anual,
     calcular_estadisticas_climaticas, generar_reporte_climatico
 )
+from mcp_core import MCPContext
+from agents import AdvisorAgent
 
 def _generar_opciones_fechas():
     """Genera lista de opciones de fechas desde 1981-01 hasta el mes actual."""
@@ -73,11 +75,12 @@ def analizar_provincia_completo(provincia, incluir_temperatura=True, incluir_com
             graficos.append(None)
         
         progress(1.0, desc="¡Análisis completado!")
-        return reporte, *graficos
+        # Devolvemos el reporte dos veces: para el Textbox y para el gr.State que usa el chat
+        return reporte, *graficos, reporte
         
     except Exception as e:
         mensaje = f"❌ Error al procesar datos de {provincia}: {str(e)}"
-        return mensaje, None, None, None, None
+        return mensaje, None, None, None, None, ""
 
 def crear_ui():
     """Crea la interfaz de usuario mejorada y funcional."""
@@ -217,6 +220,60 @@ def crear_ui():
                 
                 with gr.TabItem("📊 Comparativo Anual"):
                     plot_comparativo = gr.Plot()
+                
+                with gr.TabItem("🤖 Asistente Agroclimático"):
+                    chat = gr.Chatbot(label="Asistente Agroclimático Inteligente", height=400, type='messages')
+                    with gr.Row():
+                        user_msg = gr.Textbox(placeholder="Preguntá: '¿Cómo viene la tendencia de lluvias en Córdoba?'", label="Mensaje", scale=4)
+                        send_btn = gr.Button("Enviar", variant="primary", scale=1)
+                    backend_label = gr.HTML(value='<div class="backend-label">Modelo: (detectando)</div>')
+                    # Estados MCP
+                    mcp_state = gr.State(value=None)
+                    advisor_state = gr.State(value=None)
+                    reporte_state = gr.State(value=None)
+                    
+                    def _chat_respond(message, history, mcp, advisor, reporte_txt):
+                        if mcp is None or advisor is None:
+                            mcp = MCPContext()
+                            advisor = AdvisorAgent(mcp, model="google/flan-t5-base")
+                        history = history or []
+                        if not message:
+                            # Actualizar backend label aun sin mensaje
+                            try:
+                                bk = advisor.llm.backend()
+                                mcp.set("llm_backend", bk)
+                            except Exception:
+                                bk = "(desconocido)"
+                            return history, mcp, advisor, reporte_txt, f'<div class="backend-label">Modelo: {bk}</div>'
+                        # Inyectar el reporte detallado en el contexto compartido
+                        try:
+                            if isinstance(reporte_txt, str) and len(reporte_txt.strip()) > 0:
+                                mcp.set("reporte_detallado", reporte_txt)
+                        except Exception:
+                            pass
+                        try:
+                            reply = advisor.call(message)
+                        except Exception as e:
+                            reply = f"Error del asistente: {e}"
+                        history = history + [(message, reply)]
+                        # Guardar backend y devolver etiqueta
+                        try:
+                            bk = advisor.llm.backend()
+                            mcp.set("llm_backend", bk)
+                        except Exception:
+                            bk = "(desconocido)"
+                        return history, mcp, advisor, reporte_txt, f'<div class="backend-label">Modelo: {bk}</div>'
+                    
+                    send_btn.click(
+                        fn=_chat_respond,
+                        inputs=[user_msg, chat, mcp_state, advisor_state, reporte_state],
+                        outputs=[chat, mcp_state, advisor_state, reporte_state, backend_label]
+                    )
+                    user_msg.submit(
+                        fn=_chat_respond,
+                        inputs=[user_msg, chat, mcp_state, advisor_state, reporte_state],
+                        outputs=[chat, mcp_state, advisor_state, reporte_state, backend_label]
+                    )
             
             
         
@@ -224,7 +281,7 @@ def crear_ui():
         analizar_btn.click(
             fn=analizar_provincia_completo,
             inputs=[provincia_input, incluir_temp, incluir_comp, fecha_inicio_input, fecha_fin_input],
-            outputs=[reporte_output, plot_historico, plot_prediccion, plot_temperatura, plot_comparativo],
+            outputs=[reporte_output, plot_historico, plot_prediccion, plot_temperatura, plot_comparativo, reporte_state],
             show_progress=True
         )
     

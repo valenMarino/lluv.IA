@@ -193,3 +193,15 @@ button[role="tab"][aria-selected="true"] {
   padding: 10px;             /* opcional, para separar el contenido del borde */
   border-radius: 5px;        /* opcional, esquinas redondeadas */
 }
+
+/* Indicador de backend del asistente */
+.backend-label {
+  margin-top: 8px;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: inline-block;
+}
