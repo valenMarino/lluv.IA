@@ -236,7 +236,21 @@ def crear_ui():
                         if mcp is None or advisor is None:
                             mcp = MCPContext()
                             advisor = AdvisorAgent(mcp, model="google/flan-t5-base")
+                        # Normalizar historial al formato messages [{role, content}]
                         history = history or []
+                        if history and isinstance(history[0], (list, tuple)):
+                            try:
+                                history = (
+                                    [{"role": "user", "content": u} , {"role": "assistant", "content": a}]
+                                    for (u, a) in history
+                                )
+                            except Exception:
+                                history = []
+                            # Aplanar pares en una sola lista
+                            flat = []
+                            for pair in history:
+                                flat.extend(pair)
+                            history = flat
                         if not message:
                             # Actualizar backend label aun sin mensaje
                             try:
@@ -255,7 +269,11 @@ def crear_ui():
                             reply = advisor.call(message)
                         except Exception as e:
                             reply = f"Error del asistente: {e}"
-                        history = history + [(message, reply)]
+                        # Agregar mensajes al historial en formato messages
+                        history = history + [
+                            {"role": "user", "content": message},
+                            {"role": "assistant", "content": reply},
+                        ]
                         # Guardar backend y devolver etiqueta
                         try:
                             bk = advisor.llm.backend()
