@@ -1,4 +1,4 @@
-# Lluv.IA – Análisis Meteorológico Inteligente
+# Recomendador de riego – Análisis Meteorológico Inteligente
 
 **Plataforma integral de análisis climático** para el sector agropecuario argentino, que combina datos satelitales de NASA con inteligencia artificial para generar predicciones y análisis meteorológicos detallados.
 
