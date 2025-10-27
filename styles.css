@@ -45,6 +45,7 @@
   font-weight: 800 !important;
   background: linear-gradient(135deg, #60a5fa, #818cf8);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -204,4 +205,21 @@ button[role="tab"][aria-selected="true"] {
   border-radius: 6px;
   padding: 6px 10px;
   display: inline-block;
+}
+
+/* === FORMULARIO DE LOGIN === */
+/* Personalizar placeholders del formulario de autenticación */
+.gradio-container input[type="text"]::placeholder,
+.gradio-container input[type="password"]::placeholder {
+  color: #9ca3af !important;
+  opacity: 0.8 !important;
+}
+
+/* Estilos para el formulario de login */
+body > gradio-app > div.gradio-container input[name="username"]::placeholder {
+  content: "Ingrese su email" !important;
+}
+
+body > gradio-app > div.gradio-container input[name="password"]::placeholder {
+  content: "Ingrese su contraseña" !important;
 }
