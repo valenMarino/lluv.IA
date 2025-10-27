@@ -63,7 +63,7 @@ def cargar_usuarios() -> dict:
     except FileNotFoundError:
         print("⚠️ Advertencia: No se encontró auth_config.json. Usando credenciales por defecto.")
         # Credenciales por defecto (solo para desarrollo local)
-        usuarios["admin@lluvIA.com"] = "Admin@2024!"
+        usuarios["admin@riego.com"] = "Admin@2024!"
     except json.JSONDecodeError as e:
         print(f"❌ Error al leer auth_config.json: {e}")
     

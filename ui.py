@@ -97,12 +97,12 @@ def crear_ui():
     provincias_lista = sorted(list(PROVINCIAS_COORDS.keys()))
     
     # Interfaz mejorada
-    with gr.Blocks(css=custom_css, title="Lluv.IA", theme=gr.themes.Soft()) as app:
+    with gr.Blocks(css=custom_css, title="Recomendador de Riego", theme=gr.themes.Soft()) as app:
         
         with gr.Column(elem_classes=["main-container"]):
             # Header profesional
             with gr.Column(elem_classes=["header-container"]):
-                gr.HTML('<h1 class="main-title">Lluv.IA</h1>')
+                gr.HTML('<h1 class="main-title">Recomendador de Riego</h1>'}
                 gr.HTML('<p class="main-subtitle">Predicción y análisis climático para todas las provincias argentinas</p>')
             
             with gr.Row():
@@ -224,7 +224,7 @@ def crear_ui():
                 with gr.TabItem("🤖 Asistente Agroclimático"):
                     chat = gr.Chatbot(label="Asistente Agroclimático Inteligente", height=400, type='messages')
                     with gr.Row():
-                        user_msg = gr.Textbox(placeholder="Preguntá: '¿Cómo viene la tendencia de lluvias en Córdoba?'", label="Mensaje", scale=4)
+                        user_msg = gr.Textbox(placeholder="Preguntá: '¿Cómo viene la tendencia de precipitaciones en Córdoba?'", label="Mensaje", scale=4)
                         send_btn = gr.Button("Enviar", variant="primary", scale=1)
                     backend_label = gr.HTML(value='<div class="backend-label">Modelo: (detectando)</div>')
                     # Estados MCP

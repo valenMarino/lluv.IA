@@ -51,7 +51,7 @@ class AnalysisAgent(BaseAgent):
         totales = d.groupby('year')['y'].sum().to_dict()
         return {int(k): float(v) for k, v in totales.items()}
 
-    def provincia_con_mas_lluvia(self, datos: Dict[str, pd.DataFrame], year: Optional[int] = None) -> Optional[Dict[str, Any]]:
+    def provincia_con_mas_precipitacion(self, datos: Dict[str, pd.DataFrame], year: Optional[int] = None) -> Optional[Dict[str, Any]]:
         """Devuelve la provincia con mayor precipitación acumulada en el año indicado o global."""
         mejor: Optional[Dict[str, Any]] = None
         for prov, df in datos.items():

@@ -63,7 +63,7 @@ class AdvisorAgent(BaseAgent):
         if intent == "max_rain_province":
             year = args.get("year")
             datos = self.data_agent.ensure_all()
-            mejor = self.analysis_agent.provincia_con_mas_lluvia(datos, year=year)
+            mejor = self.analysis_agent.provincia_con_mas_precipitacion(datos, year=year)
             return {"tipo": intent, "year": year, "mejor": mejor}
         return {"tipo": "desconocido"}
 
@@ -128,7 +128,7 @@ class AdvisorAgent(BaseAgent):
                 prom = None
             return (
                 f"Elabora una respuesta en español para público agro sobre la tendencia de precipitaciones en {prov}. "
-                f"Incluye 4-7 viñetas con: (1) tendencia y pendiente, (2) promedio mensual histórico, (3) meses o estaciones de mayor/menor lluvia si se infiere, "
+                f"Incluye 4-7 viñetas con: (1) tendencia y pendiente, (2) promedio mensual histórico, (3) meses o estaciones de mayor/menor precipitación si se infiere, "
                 f"(4) recomendaciones prácticas de riego/drenaje y monitoreo, (5) riesgos y medidas de manejo. "
                 f"Datos disponibles: tendencia={tend.get('descripcion')}, pendiente={tend.get('pendiente')}, promedio_mensual={prom}."
             )
@@ -142,7 +142,7 @@ class AdvisorAgent(BaseAgent):
                     f"{mejor['provincia']} con {mejor['total_mm']:.1f} mm acumulados. Incluye implicancias productivas, manejo de drenaje, "
                     f"riesgos sanitarios por humedad y una recomendación de planificación de riego."
                 )
-            return "No se pudo determinar la provincia con más lluvia. Pide aclaraciones o sugiere alternativas."
+            return "No se pudo determinar la provincia con más precipitación. Pide aclaraciones o sugiere alternativas."
         return "No hay datos suficientes en el contexto. Pide precisión (provincia y fechas) o sugiere una consulta válida."
 
     def _compose_answer(self, ctx: Dict[str, Any]) -> str:
@@ -176,8 +176,8 @@ class AdvisorAgent(BaseAgent):
                     f"La provincia con mayor precipitación{periodo} es {mejor['provincia']} con "
                     f"{mejor['total_mm']:.1f} mm acumulados. Sugerencias: asegurar drenaje, monitorear enfermedades fúngicas y planificar riegos sólo de complemento."
                 )
-            return "No pude determinar cuál fue la provincia con más lluvias; indicá el año o intentá nuevamente."
-        return "Indicá provincia y (opcionalmente) un rango de fechas para analizar la tendencia de lluvias."
+            return "No pude determinar cuál fue la provincia con más precipitaciones; indicá el año o intentá nuevamente."
+        return "Indicá provincia y (opcionalmente) un rango de fechas para analizar la tendencia de precipitaciones."
 
     def _compose_from_report(self, user_message: str, reporte: str) -> str:
         # Extrae secciones clave del reporte y arma 4-6 puntos concisos

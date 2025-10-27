@@ -1,4 +1,4 @@
-# Lluv.IA – Análisis Meteorológico Inteligente
+# Recomendador de Riego – Análisis Meteorológico Inteligente
 
 **Plataforma integral de análisis climático** para el sector agropecuario argentino, que combina datos satelitales de NASA con inteligencia artificial para generar predicciones y análisis meteorológicos detallados.
 
@@ -43,7 +43,7 @@
 
 ## Estructura del Proyecto
 ```
-lluv.IA/
+recomendador-de-riego/
 ├── nasa_api.py                 # API NASA POWER + procesamiento de datos
 ├── forecast_model.py           # Modelos de predicción con Prophet
 ├── ui.py                       # Interfaz Gradio moderna
@@ -91,7 +91,7 @@ pip (gestor de paquetes)
 ```bash
 # Clonar el repositorio
 git clone [URL_DEL_REPO]
-cd lluv.IA
+cd recomendador-de-riego
 
 # Crear entorno virtual
 python -m venv .venv
@@ -119,7 +119,7 @@ python app.py
 ```bash
 # Clonar el repositorio
 git clone [URL_DEL_REPO]
-cd lluv.IA
+cd recomendador-de-riego
 
 # Instalar dependencias
 pip install -r requirements.txt
