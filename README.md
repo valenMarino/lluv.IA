@@ -27,6 +27,12 @@
 - Alertas automáticas de riesgo climático
 - Recomendaciones agronómicas personalizadas
 
+### 🔐 **Seguridad**
+- Sistema de autenticación integrado
+- Protección de acceso con email y contraseña
+- Validación de contraseñas seguras (10+ caracteres, mayúsculas, números, símbolos)
+- Soporte para variables de entorno en producción
+
 ## Tecnologías Utilizadas
 - **Python 3.8+**
 - **Prophet** (modelo de predicción temporal)
@@ -38,13 +44,17 @@
 ## Estructura del Proyecto
 ```
 lluv.IA/
-├── nasa_api.py          # API NASA POWER + procesamiento de datos
-├── forecast_model.py    # Modelos de predicción con Prophet
-├── ui.py               # Interfaz Gradio moderna
-├── utils.py            # Visualizaciones y análisis estadístico
-├── main.py             # Punto de entrada
-├── requirements.txt    # Dependencias del proyecto
-└── README.md          # Documentación
+├── nasa_api.py                 # API NASA POWER + procesamiento de datos
+├── forecast_model.py           # Modelos de predicción con Prophet
+├── ui.py                       # Interfaz Gradio moderna
+├── utils.py                    # Visualizaciones y análisis estadístico
+├── auth.py                     # Sistema de autenticación
+├── auth_config.json            # Credenciales (no subir a git)
+├── auth_config.example.json    # Ejemplo de configuración
+├── app.py                      # Punto de entrada
+├── requirements.txt            # Dependencias del proyecto
+├── AUTENTICACION.md           # Guía de autenticación
+└── README.md                   # Documentación
 ```
 
 ## Funcionalidades
@@ -95,9 +105,15 @@ source .venv/bin/activate
 # Instalar dependencias en el entorno virtual
 pip install -r requirements.txt
 
+# Configurar autenticación (primera vez)
+cp auth_config.example.json auth_config.json
+# Editar auth_config.json con tus credenciales
+
 # Ejecutar la aplicación
 python app.py
 ```
+
+> 📖 **Nota**: Para más detalles sobre configuración de autenticación, consulta [AUTENTICACION.md](AUTENTICACION.md)
 
 ### Instalación Directa (Sin entorno virtual)
 ```bash
@@ -107,6 +123,10 @@ cd lluv.IA
 
 # Instalar dependencias
 pip install -r requirements.txt
+
+# Configurar autenticación (primera vez)
+cp auth_config.example.json auth_config.json
+# Editar auth_config.json con tus credenciales
 
 # Ejecutar la aplicación
 python app.py
