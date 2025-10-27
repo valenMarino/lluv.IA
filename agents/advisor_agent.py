@@ -102,20 +102,38 @@ class AdvisorAgent(BaseAgent):
         return None
 
     def _build_prompt(self, user_message: str, ctx: Dict[str, Any]) -> str:
+        # Obtener contexto de Qdrant si está disponible
+        qdrant_context = ""
+        try:
+            qdrant_context = self.context.get("qdrant_context", "")
+        except Exception:
+            qdrant_context = ""
+        
         # Si existe un reporte detallado en el contexto compartido, usarlo como fuente principal
         try:
             reporte = self.context.get("reporte_detallado")
         except Exception:
             reporte = None
+        
+        # Construir prompt con contexto de Qdrant si está disponible
         if isinstance(reporte, str) and len(reporte.strip()) > 0:
-            return (
+            base_prompt = (
                 "Responde en español, orientado al agro. Usa EXCLUSIVAMENTE la información del siguiente "
                 "'Reporte Climático Detallado'. Entrega una respuesta más desarrollada en 4-7 puntos breves, "
                 "con recomendaciones prácticas de riego y manejo (si aplica), cifras clave (promedios/rangos) y riesgos. "
-                "No repitas texto literal. Si falta información, menciona la limitación. No hables de temas fuera de clima/agro."
+                "No repitas texto literal. Si falta información, menciona la limitación. No hables de temas fuera de clima/agro.\n\n"
                 f"Reporte:\n{reporte}\n\n"
-                f"Pregunta del usuario: {user_message}"
             )
+            
+            # Agregar contexto de Qdrant si existe
+            if qdrant_context and len(qdrant_context.strip()) > 0:
+                base_prompt += (
+                    "Información adicional de la base de conocimientos:\n"
+                    f"{qdrant_context}\n\n"
+                )
+            
+            base_prompt += f"Pregunta del usuario: {user_message}"
+            return base_prompt
         if ctx.get("tipo") == "trend_province":
             prov = ctx.get("provincia")
             resumen = ctx.get("resumen", {})
@@ -126,24 +144,49 @@ class AdvisorAgent(BaseAgent):
                 prom = est.get("precipitacion", {}).get("promedio_mensual")
             except Exception:
                 prom = None
-            return (
+            
+            base_prompt = (
                 f"Elabora una respuesta en español para público agro sobre la tendencia de precipitaciones en {prov}. "
                 f"Incluye 4-7 viñetas con: (1) tendencia y pendiente, (2) promedio mensual histórico, (3) meses o estaciones de mayor/menor lluvia si se infiere, "
                 f"(4) recomendaciones prácticas de riego/drenaje y monitoreo, (5) riesgos y medidas de manejo. "
                 f"Datos disponibles: tendencia={tend.get('descripcion')}, pendiente={tend.get('pendiente')}, promedio_mensual={prom}."
             )
+            
+            # Agregar contexto de Qdrant si existe
+            if qdrant_context and len(qdrant_context.strip()) > 0:
+                base_prompt += (
+                    f"\n\nInformación adicional de la base de conocimientos:\n{qdrant_context}"
+                )
+            
+            return base_prompt
         if ctx.get("tipo") == "max_rain_province":
             mejor = ctx.get("mejor")
             year = ctx.get("year")
             if mejor:
                 periodo = f" en {year}" if year else " (series histórica)"
-                return (
+                base_prompt = (
                     f"Responde en español con 4-6 puntos: provincia con mayor precipitación{periodo}: "
                     f"{mejor['provincia']} con {mejor['total_mm']:.1f} mm acumulados. Incluye implicancias productivas, manejo de drenaje, "
                     f"riesgos sanitarios por humedad y una recomendación de planificación de riego."
                 )
+                
+                # Agregar contexto de Qdrant si existe
+                if qdrant_context and len(qdrant_context.strip()) > 0:
+                    base_prompt += (
+                        f"\n\nInformación adicional de la base de conocimientos:\n{qdrant_context}"
+                    )
+                
+                return base_prompt
             return "No se pudo determinar la provincia con más lluvia. Pide aclaraciones o sugiere alternativas."
-        return "No hay datos suficientes en el contexto. Pide precisión (provincia y fechas) o sugiere una consulta válida."
+        
+        # Caso por defecto: agregar contexto de Qdrant si existe
+        base_prompt = "No hay datos suficientes en el contexto. Pide precisión (provincia y fechas) o sugiere una consulta válida."
+        if qdrant_context and len(qdrant_context.strip()) > 0:
+            base_prompt = (
+                f"Responde basándote en la siguiente información de la base de conocimientos:\n\n{qdrant_context}\n\n"
+                "Si no es suficiente, pide precisión (provincia y fechas) o sugiere una consulta válida."
+            )
+        return base_prompt
 
     def _compose_answer(self, ctx: Dict[str, Any]) -> str:
         # Genera respuestas naturales sin depender del LLM

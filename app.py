@@ -2,6 +2,16 @@ from ui import crear_ui
 from auth import obtener_funcion_auth
 import os
 
+# Cargar variables de entorno desde .env solo si existe (desarrollo local)
+# En Hugging Face Spaces, las variables ya están cargadas automáticamente
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # python-dotenv no está instalado, usar variables de entorno del sistema
+    # Esto es común en Hugging Face Spaces donde los secretos ya están disponibles
+    pass
+
 if __name__ == "__main__":
     app = crear_ui()
     

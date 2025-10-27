@@ -8,7 +8,7 @@ from utils import (
     graficar_temperatura, graficar_comparativo_anual,
     calcular_estadisticas_climaticas, generar_reporte_climatico
 )
-from mcp_core import MCPContext
+from mcp_core import MCPContext, QdrantRetriever
 from agents import AdvisorAgent
 
 def _generar_opciones_fechas():
@@ -221,8 +221,8 @@ def crear_ui():
                 with gr.TabItem("📊 Comparativo Anual"):
                     plot_comparativo = gr.Plot()
                 
-                with gr.TabItem("🤖 Asistente Agroclimático"):
-                    chat = gr.Chatbot(label="Asistente Agroclimático Inteligente", height=400, type='messages')
+                with gr.TabItem("🤖 Recomendador de riego"):
+                    chat = gr.Chatbot(label="Recomendador de riego", height=400, type='messages')
                     with gr.Row():
                         user_msg = gr.Textbox(placeholder="Preguntá: '¿Cómo viene la tendencia de lluvias en Córdoba?'", label="Mensaje", scale=4)
                         send_btn = gr.Button("Enviar", variant="primary", scale=1)
@@ -231,11 +231,21 @@ def crear_ui():
                     mcp_state = gr.State(value=None)
                     advisor_state = gr.State(value=None)
                     reporte_state = gr.State(value=None)
+                    qdrant_state = gr.State(value=None)
                     
-                    def _chat_respond(message, history, mcp, advisor, reporte_txt):
+                    def _chat_respond(message, history, mcp, advisor, reporte_txt, qdrant_retriever):
                         if mcp is None or advisor is None:
                             mcp = MCPContext()
                             advisor = AdvisorAgent(mcp, model="google/flan-t5-base")
+                        
+                        # Inicializar Qdrant solo si OpenAI está activo
+                        if qdrant_retriever is None and advisor.llm.is_openai_active():
+                            qdrant_retriever = QdrantRetriever()
+                            if qdrant_retriever.is_available():
+                                print("✅ Qdrant conectado y disponible para búsqueda vectorial")
+                            else:
+                                print("⚠️ Qdrant no disponible (verifica QDRANT_URL y QDRANT_API_KEY)")
+                                qdrant_retriever = None
                         # Normalizar historial al formato messages [{role, content}]
                         history = history or []
                         if history and isinstance(history[0], (list, tuple)):
@@ -258,7 +268,19 @@ def crear_ui():
                                 mcp.set("llm_backend", bk)
                             except Exception:
                                 bk = "(desconocido)"
-                            return history, mcp, advisor, reporte_txt, f'<div class="backend-label">Modelo: {bk}</div>'
+                            return history, mcp, advisor, reporte_txt, qdrant_retriever, f'<div class="backend-label">Modelo: {bk}</div>'
+                        
+                        # Buscar contexto en Qdrant solo si OpenAI está activo
+                        qdrant_context = ""
+                        if qdrant_retriever is not None and qdrant_retriever.is_available():
+                            try:
+                                qdrant_context = qdrant_retriever.get_context(message, limit=3)
+                                if qdrant_context:
+                                    mcp.set("qdrant_context", qdrant_context)
+                                    print(f"📚 Contexto de Qdrant obtenido ({len(qdrant_context)} caracteres)")
+                            except Exception as e:
+                                print(f"⚠️ Error obteniendo contexto de Qdrant: {e}")
+                        
                         # Inyectar el reporte detallado en el contexto compartido
                         try:
                             if isinstance(reporte_txt, str) and len(reporte_txt.strip()) > 0:
@@ -280,17 +302,17 @@ def crear_ui():
                             mcp.set("llm_backend", bk)
                         except Exception:
                             bk = "(desconocido)"
-                        return history, mcp, advisor, reporte_txt, f'<div class="backend-label">Modelo: {bk}</div>'
+                        return history, mcp, advisor, reporte_txt, qdrant_retriever, f'<div class="backend-label">Modelo: {bk}</div>'
                     
                     send_btn.click(
                         fn=_chat_respond,
-                        inputs=[user_msg, chat, mcp_state, advisor_state, reporte_state],
-                        outputs=[chat, mcp_state, advisor_state, reporte_state, backend_label]
+                        inputs=[user_msg, chat, mcp_state, advisor_state, reporte_state, qdrant_state],
+                        outputs=[chat, mcp_state, advisor_state, reporte_state, qdrant_state, backend_label]
                     )
                     user_msg.submit(
                         fn=_chat_respond,
-                        inputs=[user_msg, chat, mcp_state, advisor_state, reporte_state],
-                        outputs=[chat, mcp_state, advisor_state, reporte_state, backend_label]
+                        inputs=[user_msg, chat, mcp_state, advisor_state, reporte_state, qdrant_state],
+                        outputs=[chat, mcp_state, advisor_state, reporte_state, qdrant_state, backend_label]
                     )
             
             

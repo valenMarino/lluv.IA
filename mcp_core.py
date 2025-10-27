@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 class MCPContext:
     """Minimal MCP-like shared context to coordinate agents.
@@ -166,3 +166,130 @@ class LLM:
         if self.client is not None:
             return f"hf:{self.model}"
         return "none"
+    
+    def is_openai_active(self) -> bool:
+        """Verifica si OpenAI está activo y configurado."""
+        return self._openai_client is not None
+
+
+# Optional Qdrant client
+try:
+    from qdrant_client import QdrantClient
+    from qdrant_client.models import Distance, VectorParams, PointStruct
+except Exception:
+    QdrantClient = None  # type: ignore
+
+
+class QdrantRetriever:
+    """Cliente para búsqueda vectorial en Qdrant Cloud.
+    Solo se usa cuando OpenAI está activo.
+    """
+    def __init__(self, collection_name: str = "recomendador-de-riego"):
+        self.collection_name = collection_name
+        self.client: Optional[Any] = None
+        self._openai_client = None
+        # Usar el mismo modelo de embeddings que se usó para crear la colección
+        self._embedding_model = os.getenv("EMBEDDING_MODEL", "text-embedding-3-large")
+        
+        # Configuración desde variables de entorno
+        qdrant_url = os.getenv("QDRANT_URL")
+        qdrant_api_key = os.getenv("QDRANT_API_KEY")
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        
+        # Inicializar cliente Qdrant si está disponible
+        if QdrantClient is not None and qdrant_url and qdrant_api_key:
+            try:
+                self.client = QdrantClient(
+                    url=qdrant_url,
+                    api_key=qdrant_api_key,
+                )
+            except Exception as e:
+                print(f"⚠️ No se pudo conectar a Qdrant: {e}")
+                self.client = None
+        
+        # Inicializar cliente OpenAI para embeddings
+        if openai_api_key and OpenAIClientNew is not None:
+            try:
+                self._openai_client = OpenAIClientNew(api_key=openai_api_key)
+            except Exception:
+                self._openai_client = None
+    
+    def is_available(self) -> bool:
+        """Verifica si Qdrant está disponible y configurado."""
+        return self.client is not None and self._openai_client is not None
+    
+    def _get_embedding(self, text: str) -> Optional[List[float]]:
+        """Genera embedding usando OpenAI."""
+        if self._openai_client is None:
+            return None
+        
+        try:
+            response = self._openai_client.embeddings.create(
+                model=self._embedding_model,
+                input=text
+            )
+            return response.data[0].embedding
+        except Exception as e:
+            print(f"⚠️ Error generando embedding: {e}")
+            return None
+    
+    def search(self, query: str, limit: int = 3) -> List[Dict[str, Any]]:
+        """Busca documentos relevantes en Qdrant basándose en la consulta.
+        
+        Args:
+            query: Texto de consulta del usuario
+            limit: Número máximo de resultados a retornar
+            
+        Returns:
+            Lista de documentos relevantes con su contenido y score
+        """
+        if not self.is_available():
+            return []
+        
+        # Generar embedding de la consulta
+        query_vector = self._get_embedding(query)
+        if query_vector is None:
+            return []
+        
+        try:
+            # Buscar en Qdrant
+            search_result = self.client.search(
+                collection_name=self.collection_name,
+                query_vector=query_vector,
+                limit=limit
+            )
+            
+            # Formatear resultados
+            results = []
+            for hit in search_result:
+                results.append({
+                    "content": hit.payload.get("text", ""),
+                    "metadata": hit.payload.get("metadata", {}),
+                    "score": hit.score
+                })
+            
+            return results
+        except Exception as e:
+            print(f"⚠️ Error buscando en Qdrant: {e}")
+            return []
+    
+    def get_context(self, query: str, limit: int = 3) -> str:
+        """Obtiene contexto relevante de Qdrant formateado como texto.
+        
+        Args:
+            query: Texto de consulta del usuario
+            limit: Número máximo de resultados
+            
+        Returns:
+            Contexto formateado como string
+        """
+        results = self.search(query, limit)
+        
+        if not results:
+            return ""
+        
+        context_parts = []
+        for i, result in enumerate(results, 1):
+            context_parts.append(f"[Contexto {i}] {result['content']}")
+        
+        return "\n\n".join(context_parts)
