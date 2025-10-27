@@ -79,8 +79,8 @@ Sos un experto en agricultura de precisión. Tenés el siguiente informe climát
 **Requisitos:** Python 3.10+, Git
 
 ```powershell
-git clone <url-del-repo>
-cd lluv.IA
+git clone https://github.com/valenMarino/recomendador-de-riego
+cd recomendador-de-riego
 
 # crear y activar entorno
 python -m venv .venv
