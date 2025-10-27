@@ -2,6 +2,8 @@
 
 **Última actualización:** 27/10/2025
 
+## Desplegado en: [ https://huggingface.co/spaces/valtein94/recomendador-de-riego ]
+
 ---
 
 ## 1. Resumen
