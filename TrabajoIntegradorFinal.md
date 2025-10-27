@@ -9,10 +9,14 @@
 `Recomendador de riego` es un MVP desarrollado para el sector agropecuario que facilita la toma de decisiones sobre riego y manejo a partir de datos climáticos y modelos predictivos. El sistema:
 
 - Descarga datos climáticos mensuales (NASA POWER) por provincia/punto.
+  https://power.larc.nasa.gov/api/pages/?urls.primaryName=Monthly%20%26%20Annual#/Data%20Requests/monthly_single_point_data_request_api_temporal_monthly_point_get
 - Genera series históricas y predicciones a 24 meses con Prophet.
+  https://facebook.github.io/prophet/
 - Produce informes automáticos (texto y gráficos interactivos).
-- Ofrece un asistente conversacional (LLM) que utiliza el informe como contexto para entregar recomendaciones prácticas en español.
-
+- Ofrece un asistente conversacional (LLM) que utiliza el informe como contexto para entregar recomendaciones prácticas en español
+  https://huggingface.co/google/flan-t5-base
+  https://platform.openai.com/docs/models/gpt-5-mini
+  
 La interfaz de usuario de la demo está implementada con Gradio y permite seleccionar provincia y rango de fechas, visualizar históricos y predicciones, consultar un chat contextual y exportar reportes.
 
 ## 2. Declaración del MVP
