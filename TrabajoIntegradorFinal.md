@@ -4,7 +4,7 @@
 
 ---
 
-## 1. Resumen ejecutivo
+## 1. Resumen
 
 `Recomendador de riego` es un MVP desarrollado para el sector agropecuario que facilita la toma de decisiones sobre riego y manejo a partir de datos climáticos y modelos predictivos. El sistema:
 
